@@ -1,0 +1,78 @@
+﻿@page "/"
+@model Sukoku.Pages.Index
+
+@{
+    Layout = null;
+
+    var currentComplexity = Model.Complexity;
+
+    int seed = Random.Shared.Next();
+    var sudoku = Sudoku.Generate(seed);
+
+    string RenderSudokuNumber(int i, int j)
+    {
+        var value = sudoku.Values[i, j];
+        if (value == 0)
+            return "*";
+
+        return value.ToString();
+    }
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sukoku</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body>
+<div>
+    <div class="section">
+        
+        <h2 class="title">Choose Sudoku Difficulty</h2>
+        <form>
+            @{
+                var complexityValues = Enum.GetValues<Sudoku.Complexity>();
+            }
+
+            <div class="field">
+                @foreach (var complexityValue in complexityValues)
+                {
+                    <label class="radio" for="complexity@(complexityValue)">
+                        <input type="radio" name="complexity" id="complexity@(complexityValue)" asp-for="Complexity" value="@complexityValue.ToString()" checked="@(complexityValue == currentComplexity)"/>
+                        @complexityValue.ToString()
+                    </label>
+                }
+            </div>
+
+            <input class="button" type="submit" value="Generate"/>
+        </form>
+    </div>
+    
+    <div class="section">
+        <h2 class="title">Generated Sudoku - @Model.Complexity - @seed</h2>
+        
+        <a href="sudoku/@currentComplexity/pdf/@seed">
+            <button class="button is-primary">
+                Download
+            </button>
+        </a>
+
+        <div class="block">
+            <p>Preview</p>
+            <embed type="application/pdf" src="sudoku/@currentComplexity/pdf/@seed/preview" width="900px" height="800px"/>
+        </div>
+        
+        <details class="block mt-5">
+            <summary>
+                Solution
+            </summary>
+
+            <embed type="application/pdf" src="sudoku/@currentComplexity/pdf/@seed/preview/solved" width="900px" height="800px"/>
+        </details>
+    </div>
+</div>
+</body>
+</html>
