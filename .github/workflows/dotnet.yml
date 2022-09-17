@@ -1,0 +1,54 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: Sukoku
+    env:
+      DEPLOY_SECRET: ${{ secrets.DEPLOY_SECRET }}
+    steps:
+# Build
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Install dependencies
+      run: dotnet restore -r linux-x64
+    - name: Publish
+      run: dotnet publish --configuration Release --no-restore -o publish -r linux-x64 --self-contained true /p:SourceRevisionId=${{ github.sha }}
+
+# Deploy
+    - name: Setup Tailscale
+      id: tailscale
+      uses: tailscale/tailscale-deploy-github@main
+      with:
+        authkey: ${{ secrets.TAILSCALE_KEY }}
+    - name: Configure SSH
+      run: |
+        MACHINE_IP="$(tailscale ip -6 sharovarskyi)"
+        mkdir -p ~/.ssh/
+        echo "$DEPLOY_SECRET" > ~/.ssh/site.key
+        chmod 600 ~/.ssh/site.key
+        cat >>~/.ssh/config <<END
+        Host site
+          HostName $MACHINE_IP
+          User deploy
+          IdentityFile ~/.ssh/site.key
+          StrictHostKeyChecking no
+        END
+      env:
+        SSH_USER: deploy
+        SSH_KEY: ${{ secrets.DEPLOY_SECRET }}
+    - name: Upload
+      run: rsync -azPu publish/ site:/opt/sukoku.sharovarskyi.com
+    - name: Restart site
+      run: ssh site 'sudo /bin/systemctl restart sukoku.service'
