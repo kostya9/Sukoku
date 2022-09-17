@@ -20,15 +20,15 @@ Document GeneratePdf(int[,] ints)
                 {
                     t.ColumnsDefinition(cd =>
                     {
-                        for (int i = 0; i < Sudoku.SudokuLength; i++)
+                        for (int i = 0; i < Sudoku.SudokuSideSize; i++)
                         {
                             cd.RelativeColumn();
                         }
                     });
 
-                    for (int i = 0; i < Sudoku.SudokuLength; i++)
+                    for (int i = 0; i < Sudoku.SudokuSideSize; i++)
                     {
-                        for (int j = 0; j < Sudoku.SudokuLength; j++)
+                        for (int j = 0; j < Sudoku.SudokuSideSize; j++)
                         {
                             
                             var cellSize = 55;
@@ -39,10 +39,10 @@ Document GeneratePdf(int[,] ints)
                             var thickBorder = 2.5f;
                             var thinBorder = 0.5f;
 
-                            var topBorder = i % Sudoku.SquareSize == 0 ? thickBorder : thinBorder;
-                            var bottomBorder = i % Sudoku.SquareSize == (Sudoku.SquareSize - 1) ? thickBorder : thinBorder;
-                            var leftBorder = j % Sudoku.SquareSize == 0 ? thickBorder : thinBorder;
-                            var rightBorder = j % Sudoku.SquareSize == (Sudoku.SquareSize - 1) ? thickBorder : thinBorder;
+                            var topBorder = i % Sudoku.SquareSideSize == 0 ? thickBorder : thinBorder;
+                            var bottomBorder = i % Sudoku.SquareSideSize == (Sudoku.SquareSideSize - 1) ? thickBorder : thinBorder;
+                            var leftBorder = j % Sudoku.SquareSideSize == 0 ? thickBorder : thinBorder;
+                            var rightBorder = j % Sudoku.SquareSideSize == (Sudoku.SquareSideSize - 1) ? thickBorder : thinBorder;
 
                             c = c.BorderTop(topBorder)
                                 .BorderBottom(bottomBorder)
@@ -118,13 +118,13 @@ public class Sudoku
         Hard
     }
     
-    public const int SquareSize = 3;
-    public const int SudokuLength = SquareSize * SquareSize;
+    public const int SquareSideSize = 3;
+    public const int SudokuSideSize = SquareSideSize * SquareSideSize;
     public const int EmptyCellValue = 0;
     
     public Sudoku(int[,] values, int seed)
     {
-        if (values.GetLength(0) != SudokuLength || values.GetLength(1) != SudokuLength)
+        if (values.GetLength(0) != SudokuSideSize || values.GetLength(1) != SudokuSideSize)
             throw new ArgumentException(nameof(values));
         _seed = seed;
 
@@ -136,7 +136,7 @@ public class Sudoku
     public int[,] HideForComplexity(Complexity complexity)
     {
         var random = new Random(_seed);
-        var valuesWithHidden = new int[SudokuLength, SudokuLength];
+        var valuesWithHidden = new int[SudokuSideSize, SudokuSideSize];
         
         var revealedNumbers = complexity switch
         {
@@ -147,7 +147,7 @@ public class Sudoku
         };
 
         // Reveal numbers in all squares
-        var squaresAmount = SudokuLength;
+        var squaresAmount = SudokuSideSize;
         var revealedPerSquareNumber = revealedNumbers / squaresAmount;
         var squaresWithExtraRevealed = revealedNumbers % squaresAmount;
 
@@ -169,15 +169,15 @@ public class Sudoku
 
         foreach (var (square, revealedNumber) in revealedPerSquare)
         {
-            var revealedIndices = Enumerable.Range(0, SudokuLength).OrderBy(x => random.Next()).Take(revealedNumber).ToArray();
+            var revealedIndices = Enumerable.Range(0, SudokuSideSize).OrderBy(x => random.Next()).Take(revealedNumber).ToArray();
 
             foreach (var revealedIndex in revealedIndices)
             {
-                var sqRow = revealedIndex / SquareSize;
-                var sqCol = revealedIndex % SquareSize;
+                var sqRow = revealedIndex / SquareSideSize;
+                var sqCol = revealedIndex % SquareSideSize;
 
-                var sqStartRow = SquareSize * (square / SquareSize);
-                var sqStartCol = SquareSize * (square % SquareSize);
+                var sqStartRow = SquareSideSize * (square / SquareSideSize);
+                var sqStartCol = SquareSideSize * (square % SquareSideSize);
                     
                 var row = sqStartRow + sqRow;
                 var col = sqStartCol + sqCol;
@@ -192,7 +192,7 @@ public class Sudoku
     public static Sudoku Generate(int seed)
     {
         var random = new Random(seed);
-        var values = new int[SudokuLength, SudokuLength];
+        var values = new int[SudokuSideSize, SudokuSideSize];
 
         while (true)
         {
@@ -205,18 +205,18 @@ public class Sudoku
     
     private static bool TryGenerateSudoku(Random random, int[,] values)
     {
-        for (int rowIdx = 0; rowIdx < SudokuLength; rowIdx++)
+        for (int rowIdx = 0; rowIdx < SudokuSideSize; rowIdx++)
         {
-            var row = Enumerable.Range(1, SudokuLength).OrderBy(_ => random.Next()).ToArray();
+            var row = Enumerable.Range(1, SudokuSideSize).OrderBy(_ => random.Next()).ToArray();
 
-            for (int colIdx = 0; colIdx < SudokuLength; colIdx++)
+            for (int colIdx = 0; colIdx < SudokuSideSize; colIdx++)
             {
                 var swapCandidateIdx = colIdx + 1;
                 var candidate = row[colIdx];
 
                 while (HasSameNumberAbove(values, rowIdx, colIdx, candidate) || HasSameNumberInSquare(values, rowIdx, colIdx, candidate))
                 {
-                    if (swapCandidateIdx >= SudokuLength)
+                    if (swapCandidateIdx >= SudokuSideSize)
                     {
                         // Failed
                         return false;
@@ -239,12 +239,12 @@ public class Sudoku
 
     private static bool HasSameNumberInSquare(int[,] values, int rowIdx, int colIdx, int candidate)
     {
-        var squareRowIdx = rowIdx / SquareSize;
-        var squareColIdx = colIdx / SquareSize;
+        var squareRowIdx = rowIdx / SquareSideSize;
+        var squareColIdx = colIdx / SquareSideSize;
 
-        for (var i = squareRowIdx * SquareSize; i < squareRowIdx * SquareSize + SquareSize; i++)
+        for (var i = squareRowIdx * SquareSideSize; i < squareRowIdx * SquareSideSize + SquareSideSize; i++)
         {
-            for (var j = squareColIdx * SquareSize; j < squareColIdx * SquareSize + SquareSize; j++)
+            for (var j = squareColIdx * SquareSideSize; j < squareColIdx * SquareSideSize + SquareSideSize; j++)
             {
                 if(i == rowIdx && j == colIdx)
                     continue;
