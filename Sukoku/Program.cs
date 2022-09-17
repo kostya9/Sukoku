@@ -119,6 +119,7 @@ public class Sudoku
     }
     
     public const int SudokuLength = 9;
+    public const int SquareSize = 3;
     public const int EmptyCellValue = 0;
     
     public Sudoku(int[,] values, int seed)
@@ -145,15 +146,44 @@ public class Sudoku
             _ => throw new ArgumentOutOfRangeException(nameof(complexity), complexity, null)
         };
 
-        var revealedIndices = Enumerable.Range(0, SudokuLength * SudokuLength)
-            .OrderBy(x => random.Next())
-            .Take(revealedNumbers);
+        // Reveal numbers in all squares
+        var squaresAmount = SudokuLength;
+        var revealedPerSquareNumber = revealedNumbers / squaresAmount;
+        var squaresWithExtraRevealed = revealedNumbers % squaresAmount;
 
-        foreach (var revealedIndex in revealedIndices)
+        Dictionary<int, int> revealedPerSquare = new Dictionary<int, int>();
+        var squares = Enumerable.Range(0, squaresAmount).OrderBy(x => Random.Shared.Next()).ToArray();
+
+        for (int i = 0; i < squaresAmount; i++)
         {
-            var row = revealedIndex / SudokuLength;
-            var col = revealedIndex % SudokuLength;
-            valuesWithHidden[row, col] = Values[row, col];
+            var numberOfRevealed = revealedPerSquareNumber;
+
+            if (squaresWithExtraRevealed > 0)
+            {
+                numberOfRevealed++;
+                squaresWithExtraRevealed--;
+            }
+            
+            revealedPerSquare[squares[i]] = numberOfRevealed;
+        }
+
+        foreach (var (square, revealedNumber) in revealedPerSquare)
+        {
+            var revealedIndices = Enumerable.Range(0, SudokuLength).OrderBy(x => Random.Shared.Next()).Take(revealedNumber).ToArray();
+
+            foreach (var revealedIndex in revealedIndices)
+            {
+                var sqRow = revealedIndex / SquareSize;
+                var sqCol = revealedIndex % SquareSize;
+
+                var sqStartRow = SquareSize * (square / SquareSize);
+                var sqStartCol = SquareSize * (square % SquareSize);
+                    
+                var row = sqStartRow + sqRow;
+                var col = sqStartCol + sqCol;
+
+                valuesWithHidden[row, col] = Values[row, col];   
+            }
         }
 
         return valuesWithHidden;
