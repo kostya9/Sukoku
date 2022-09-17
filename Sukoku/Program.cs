@@ -36,7 +36,7 @@ Document GeneratePdf(int[,] ints)
                             var value = ints[i, j];
                             var c = t.Cell().MinHeight(cellSize).MinWidth(cellSize).Background(Colors.Grey.Lighten3);
 
-                            var thickBorder = 3;
+                            var thickBorder = 2.5f;
                             var thinBorder = 0.5f;
 
                             var topBorder = i % 3 == 0 ? thickBorder : thinBorder;
