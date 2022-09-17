@@ -39,10 +39,10 @@ Document GeneratePdf(int[,] ints)
                             var thickBorder = 2.5f;
                             var thinBorder = 0.5f;
 
-                            var topBorder = i % 3 == 0 ? thickBorder : thinBorder;
-                            var bottomBorder = i % 3 == 2 ? thickBorder : thinBorder;
-                            var leftBorder = j % 3 == 0 ? thickBorder : thinBorder;
-                            var rightBorder = j % 3 == 2 ? thickBorder : thinBorder;
+                            var topBorder = i % Sudoku.SquareSize == 0 ? thickBorder : thinBorder;
+                            var bottomBorder = i % Sudoku.SquareSize == (Sudoku.SquareSize - 1) ? thickBorder : thinBorder;
+                            var leftBorder = j % Sudoku.SquareSize == 0 ? thickBorder : thinBorder;
+                            var rightBorder = j % Sudoku.SquareSize == (Sudoku.SquareSize - 1) ? thickBorder : thinBorder;
 
                             c = c.BorderTop(topBorder)
                                 .BorderBottom(bottomBorder)
@@ -118,8 +118,8 @@ public class Sudoku
         Hard
     }
     
-    public const int SudokuLength = 9;
     public const int SquareSize = 3;
+    public const int SudokuLength = SquareSize * SquareSize;
     public const int EmptyCellValue = 0;
     
     public Sudoku(int[,] values, int seed)
@@ -239,12 +239,12 @@ public class Sudoku
 
     private static bool HasSameNumberInSquare(int[,] values, int rowIdx, int colIdx, int candidate)
     {
-        var squareRowIdx = rowIdx / 3;
-        var squareColIdx = colIdx / 3;
+        var squareRowIdx = rowIdx / SquareSize;
+        var squareColIdx = colIdx / SquareSize;
 
-        for (int i = squareRowIdx * 3; i < squareRowIdx * 3 + 3; i++)
+        for (var i = squareRowIdx * SquareSize; i < squareRowIdx * SquareSize + SquareSize; i++)
         {
-            for (int j = squareColIdx * 3; j < squareColIdx * 3 + 3; j++)
+            for (var j = squareColIdx * SquareSize; j < squareColIdx * SquareSize + SquareSize; j++)
             {
                 if(i == rowIdx && j == colIdx)
                     continue;
