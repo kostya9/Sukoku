@@ -55,7 +55,7 @@ Document GeneratePdf(int[,] ints)
                                 c.Text(td =>
                                 {
                                     td.AlignCenter();
-                                    td.Element().Text(value).FontSize(fontSize);
+                                    td.Element().Text(value).FontSize(fontSize).ExtraBold();
                                 });
                             }
                         }
