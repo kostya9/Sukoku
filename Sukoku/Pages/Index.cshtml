@@ -7,16 +7,6 @@
     var currentComplexity = Model.Complexity;
 
     int seed = Random.Shared.Next();
-    var sudoku = Sudoku.Generate(seed);
-
-    string RenderSudokuNumber(int i, int j)
-    {
-        var value = sudoku.Values[i, j];
-        if (value == 0)
-            return "*";
-
-        return value.ToString();
-    }
 }
 
 <!DOCTYPE html>
