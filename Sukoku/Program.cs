@@ -152,7 +152,7 @@ public class Sudoku
         var squaresWithExtraRevealed = revealedNumbers % squaresAmount;
 
         Dictionary<int, int> revealedPerSquare = new Dictionary<int, int>();
-        var squares = Enumerable.Range(0, squaresAmount).OrderBy(x => Random.Shared.Next()).ToArray();
+        var squares = Enumerable.Range(0, squaresAmount).OrderBy(x => random.Next()).ToArray();
 
         for (int i = 0; i < squaresAmount; i++)
         {
@@ -169,7 +169,7 @@ public class Sudoku
 
         foreach (var (square, revealedNumber) in revealedPerSquare)
         {
-            var revealedIndices = Enumerable.Range(0, SudokuLength).OrderBy(x => Random.Shared.Next()).Take(revealedNumber).ToArray();
+            var revealedIndices = Enumerable.Range(0, SudokuLength).OrderBy(x => random.Next()).Take(revealedNumber).ToArray();
 
             foreach (var revealedIndex in revealedIndices)
             {
@@ -214,7 +214,7 @@ public class Sudoku
                 var swapCandidateIdx = colIdx + 1;
                 var candidate = row[colIdx];
 
-                while (HasNumberHigher(values, rowIdx, colIdx, candidate) || HasNumberInSquare(values, rowIdx, colIdx, candidate))
+                while (HasSameNumberAbove(values, rowIdx, colIdx, candidate) || HasSameNumberInSquare(values, rowIdx, colIdx, candidate))
                 {
                     if (swapCandidateIdx >= SudokuLength)
                     {
@@ -237,7 +237,7 @@ public class Sudoku
         return true;
     }
 
-    private static bool HasNumberInSquare(int[,] values, int rowIdx, int colIdx, int candidate)
+    private static bool HasSameNumberInSquare(int[,] values, int rowIdx, int colIdx, int candidate)
     {
         var squareRowIdx = rowIdx / 3;
         var squareColIdx = colIdx / 3;
@@ -259,7 +259,7 @@ public class Sudoku
         return false;
     }
 
-    private static bool HasNumberHigher(int[,] values, int row, int column, int candidate)
+    private static bool HasSameNumberAbove(int[,] values, int row, int column, int candidate)
     {
         for (int i = row - 1; i >= 0; i--)
         {
